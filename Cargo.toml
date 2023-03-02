@@ -1,0 +1,36 @@
+[package]
+name = "slimevr_resettime_app"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+async-stream = "0.3.4"
+chrono = "0.4.23"
+config = "0.13.3"
+console = "0.15.5"
+futures = "0.3.26"
+lazy_static = "1.4.0"
+log = "0.4.17"
+log4rs = "1.2.0"
+notify = "5.1.0"
+obws = "0.10.0"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.93"
+strfmt = "0.2.4"
+tokio = { version = "1.25.0", features = ["fs", "tokio-macros", "full"] }
+tokio-retry = "0.3.0"
+toml = "0.7.2"
+
+[profile.test]
+debug = 1
+strip = "debuginfo"
+
+[profile.dev]
+debug = 1
+strip = "debuginfo"
+
+[profile.release]
+debug = 1
+strip = "debuginfo"

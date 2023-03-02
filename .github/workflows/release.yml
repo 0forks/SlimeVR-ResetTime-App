@@ -1,0 +1,73 @@
+---
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build_binary:
+    name: Build Release
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - runs-on: windows-latest
+            name: windows-x64
+          - runs-on: ubuntu-latest
+            name: linux-x64
+    runs-on: ${{ matrix.runs-on }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build ${{ matrix.name }} release
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}-binary
+          path: |
+            target/release/slimevr_resettime_app.exe
+            target/release/slimevr_resettime_app
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: build_binary
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-x64-binary
+
+      - name: Download linux artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-x64-binary
+
+      - name: Create Windows Zip
+        run: zip windows-x64.zip slimevr_resettime_app.exe
+
+      - name: Create Linux Zip
+        run: zip linux-x64.zip slimevr_resettime_app
+
+      - name: Create Release
+        uses: "marvinpinto/action-automatic-releases@d68defdd11f9dcc7f52f35c1b7c236ee7513bcc1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            windows-x64.zip
+            linux-x64.zip
